@@ -7,12 +7,12 @@
 //
 
 import UIKit
-import CoreData
+import RealmSwift
 
 class ItemsViewController: UITableViewController {
     
-    var items = [Item]()
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    var items: Results<Item>?
+    let realm = try! Realm()
     var selectedList: List? {
         didSet {
             loadItems()
@@ -31,14 +31,14 @@ class ItemsViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return items.count
+        return items?.count ?? 1
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
-        let currentItem = items[indexPath.row]
-        cell.textLabel?.text = currentItem.title
-        cell.accessoryType = currentItem.isChecked ? .checkmark : .none
+        let currentItem = items?[indexPath.row]
+        cell.textLabel?.text = currentItem?.title ?? "Add more tasks to do"
+        cell.accessoryType = currentItem?.isChecked ?? false ? .checkmark : .none
         return cell
     }
     
@@ -46,8 +46,16 @@ class ItemsViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        items[indexPath.row].isChecked = !items[indexPath.row].isChecked
-        saveData()
+        if let item = items?[indexPath.row] {
+            do {
+                try realm.write({
+                    item.isChecked = !item.isChecked
+                })
+            } catch {
+                print("Error while updating check mark: \(error.localizedDescription)")
+            }
+        }
+        tableView.reloadData()
     }
     
     //MARK: - Funtionality
@@ -57,13 +65,17 @@ class ItemsViewController: UITableViewController {
         let alert = UIAlertController(title: "Add new item", message: "What would you like to achieve today?", preferredStyle: .alert)
         let action = UIAlertAction(title: "Add", style: .default) { (action) in
             //print("\(textField.text ?? "Not") Added Successfully")
-            if let text = textField.text {
-                let newItem = Item(context: self.context)
-                newItem.title = text
-                newItem.isChecked = false
-                newItem.parentCategory = self.selectedList
-                self.items.append(newItem)
-                self.saveData()
+            if let text = textField.text, let currentList = self.selectedList {
+                do {
+                    try self.realm.write({
+                        let newItem = Item()
+                        newItem.title = text
+                        currentList.items.append(newItem)
+                        self.tableView.reloadData()
+                    })
+                } catch {
+                    print("Error: \(error)")
+                }
             }
         }
         alert.addAction(action)
@@ -74,30 +86,8 @@ class ItemsViewController: UITableViewController {
         present(alert, animated: true)
     }
     
-    func saveData() {
-        do {
-            try context.save()
-        } catch {
-            print("Error while trying to save context \(error.localizedDescription)")
-        }
-        tableView.reloadData()
-    }
-    
-    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest(), using predicate: NSPredicate? = nil) {
-        
-        let categoryPredicate = NSPredicate(format: "parentCategory.title MATCHES %@", selectedList!.title!)
-        
-        if let existingPredicate = predicate {
-            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [existingPredicate, categoryPredicate])
-        } else {
-            request.predicate = categoryPredicate
-        }
-        
-        do {
-            items = try context.fetch(request)
-        } catch {
-            print(error.localizedDescription)
-        }
+    func loadItems() {
+        items = selectedList?.items.sorted(byKeyPath: "title", ascending: true)
         tableView.reloadData()
     }
 }
@@ -106,9 +96,8 @@ class ItemsViewController: UITableViewController {
 
 extension ItemsViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        let request: NSFetchRequest<Item> = Item.fetchRequest()
-        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
-        loadItems(with: request, using: NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!))
+        items = items?.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "dateCreated", ascending: true)
+        tableView.reloadData()
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {

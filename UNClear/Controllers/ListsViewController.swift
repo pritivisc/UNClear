@@ -7,12 +7,12 @@
 //
 
 import UIKit
-import CoreData
+import RealmSwift
 
 class ListsViewController: UITableViewController {
     
-    var lists = [List]()
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    var lists: Results<List>?
+    let realm = try! Realm()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,12 +23,12 @@ class ListsViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return lists.count
+        return lists?.count ?? 1
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "listCell", for: indexPath)
-        cell.textLabel?.text = lists[indexPath.row].title
+        cell.textLabel?.text = lists?[indexPath.row].title ?? "Add more lists"
         return cell
     }
     
@@ -45,10 +45,9 @@ class ListsViewController: UITableViewController {
         let alert = UIAlertController(title: "Add List", message: "Enter List Name Below", preferredStyle: .alert)
         let action = UIAlertAction(title: "Add", style: .default) { (action) in
             if let text = textField.text {
-                let newList = List(context: self.context)
+                let newList = List()
                 newList.title = text
-                self.lists.append(newList)
-                self.saveLists()
+                self.save(list: newList)
             }
         }
         alert.addAction(action)
@@ -61,18 +60,16 @@ class ListsViewController: UITableViewController {
     
     // MARK: - Data Manipulation Methods
     
-    func loadLists(with request: NSFetchRequest<List> = List.fetchRequest()) {
-        do {
-            lists = try context.fetch(request)
-        } catch {
-            print(error)
-        }
+    func loadLists() {
+        lists = realm.objects(List.self)
         tableView.reloadData()
     }
     
-    func saveLists() {
+    func save(list: List) {
         do {
-            try context.save()
+            try realm.write({
+                realm.add(list)
+            })
         } catch {
             print(error)
         }
@@ -84,7 +81,7 @@ class ListsViewController: UITableViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let selectedIndexPath = tableView.indexPathForSelectedRow {
             let destinationVC = segue.destination as! ItemsViewController
-            destinationVC.selectedList = lists[selectedIndexPath.row]
+            destinationVC.selectedList = lists?[selectedIndexPath.row]
         }
     }
     
