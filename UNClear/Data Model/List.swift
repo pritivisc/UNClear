@@ -11,5 +11,6 @@ import RealmSwift
 
 class List: Object {
     @objc dynamic var title: String = ""
+    @objc dynamic var bgColor: String = ""
     var items = RealmSwift.List<Item>()
 }

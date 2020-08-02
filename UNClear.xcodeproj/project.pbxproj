@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		49A14D9B39FE7DAE05D815D4 /* Pods_UNClear.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 99BA1927B31D737994FFD7C7 /* Pods_UNClear.framework */; };
+		728299F024D312A5000FC6BB /* trash-circle.png in Resources */ = {isa = PBXBuildFile; fileRef = 728299EF24D312A5000FC6BB /* trash-circle.png */; };
+		728299F224D3203D000FC6BB /* SwipeTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 728299F124D3203D000FC6BB /* SwipeTableViewController.swift */; };
 		72A75A1C24CF09D8002E35D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72A75A1B24CF09D8002E35D9 /* AppDelegate.swift */; };
 		72A75A1E24CF09D8002E35D9 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72A75A1D24CF09D8002E35D9 /* SceneDelegate.swift */; };
 		72A75A2324CF09D8002E35D9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 72A75A2124CF09D8002E35D9 /* Main.storyboard */; };
@@ -20,6 +22,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		728299EF24D312A5000FC6BB /* trash-circle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "trash-circle.png"; path = "Assets.xcassets/trash-circle.png"; sourceTree = "<group>"; };
+		728299F124D3203D000FC6BB /* SwipeTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeTableViewController.swift; sourceTree = "<group>"; };
 		72A75A1824CF09D8002E35D9 /* UNClear.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UNClear.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		72A75A1B24CF09D8002E35D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		72A75A1D24CF09D8002E35D9 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -82,6 +86,7 @@
 				72A75A1D24CF09D8002E35D9 /* SceneDelegate.swift */,
 				72A75A2124CF09D8002E35D9 /* Main.storyboard */,
 				72A75A2424CF09DC002E35D9 /* Assets.xcassets */,
+				728299EF24D312A5000FC6BB /* trash-circle.png */,
 				72A75A3324D02CA2002E35D9 /* Data Model */,
 				72A75A3524D02CEF002E35D9 /* Controllers */,
 				72A75A3424D02CB0002E35D9 /* Views */,
@@ -112,6 +117,7 @@
 			children = (
 				72A75A2F24CF4140002E35D9 /* ItemsViewController.swift */,
 				72A75A5C24D19208002E35D9 /* ListsViewController.swift */,
+				728299F124D3203D000FC6BB /* SwipeTableViewController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -184,6 +190,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				728299F024D312A5000FC6BB /* trash-circle.png in Resources */,
 				72A75A2824CF09DC002E35D9 /* LaunchScreen.storyboard in Resources */,
 				72A75A2524CF09DC002E35D9 /* Assets.xcassets in Resources */,
 				72A75A2324CF09D8002E35D9 /* Main.storyboard in Resources */,
@@ -242,6 +249,7 @@
 				72A75A1C24CF09D8002E35D9 /* AppDelegate.swift in Sources */,
 				72A75A6524D212F3002E35D9 /* List.swift in Sources */,
 				72A75A3024CF4140002E35D9 /* ItemsViewController.swift in Sources */,
+				728299F224D3203D000FC6BB /* SwipeTableViewController.swift in Sources */,
 				72A75A1E24CF09D8002E35D9 /* SceneDelegate.swift in Sources */,
 				72A75A6324D212E9002E35D9 /* Item.swift in Sources */,
 				72A75A5D24D19208002E35D9 /* ListsViewController.swift in Sources */,

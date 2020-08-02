@@ -8,27 +8,38 @@
 
 import UIKit
 import RealmSwift
+import ChameleonFramework
 
-class ListsViewController: UITableViewController {
+class ListsViewController: SwipeTableViewController {
     
     var lists: Results<List>?
-    let realm = try! Realm()
-
+    @IBOutlet weak var plusBB: UIBarButtonItem!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         loadLists()
     }
-
+    
+    override func viewWillAppear(_ animated: Bool) {
+        guard let navBar = navigationController?.navigationBar else {
+            fatalError()
+        }
+        navBar.barTintColor = UIColor.systemPink
+        plusBB.tintColor = UIColor.white
+    }
+    
     // MARK: - Table view data source
-
+    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
         return lists?.count ?? 1
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "listCell", for: indexPath)
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         cell.textLabel?.text = lists?[indexPath.row].title ?? "Add more lists"
+        cell.backgroundColor = UIColor(hexString: lists?[indexPath.row].bgColor ?? UIColor.white.hexValue())
+        cell.textLabel?.textColor = ContrastColorOf(cell.backgroundColor!, returnFlat: true)
         return cell
     }
     
@@ -47,6 +58,7 @@ class ListsViewController: UITableViewController {
             if let text = textField.text {
                 let newList = List()
                 newList.title = text
+                newList.bgColor = UIColor.randomFlat().hexValue()
                 self.save(list: newList)
             }
         }
@@ -74,6 +86,16 @@ class ListsViewController: UITableViewController {
             print(error)
         }
         tableView.reloadData()
+    }
+    
+    override func updateModel(at indexPath: IndexPath) {
+        do {
+            try self.realm.write({
+                self.realm.delete(self.lists![indexPath.row])
+            })
+        } catch {
+            print(error)
+        }
     }
     
     // MARK: - Segue Methods

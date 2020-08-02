@@ -8,21 +8,42 @@
 
 import UIKit
 import RealmSwift
+import ChameleonFramework
 
-class ItemsViewController: UITableViewController {
+class ItemsViewController: SwipeTableViewController {
     
+    @IBOutlet weak var searchBar: UISearchBar!
     var items: Results<Item>?
-    let realm = try! Realm()
     var selectedList: List? {
         didSet {
             loadItems()
         }
     }
+    @IBOutlet weak var plusBB: UIBarButtonItem!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         loadItems()
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        if let col = selectedList?.bgColor {
+            guard let navBar = navigationController?.navigationBar else {
+                fatalError()
+            }
+            title = selectedList!.title
+            if let navBarColor = UIColor(hexString: col){
+                navBar.barTintColor = navBarColor
+                navBar.tintColor = ContrastColorOf(navBarColor, returnFlat: true)
+                navBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: ContrastColorOf(navBarColor, returnFlat: true)]
+                plusBB.tintColor = ContrastColorOf(navBarColor, returnFlat: true)
+                searchBar.barTintColor = navBarColor
+            }
+        }
+        
+    }
+    
+    
     
     // MARK: - Table view data source
     
@@ -35,10 +56,15 @@ class ItemsViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         let currentItem = items?[indexPath.row]
         cell.textLabel?.text = currentItem?.title ?? "Add more tasks to do"
         cell.accessoryType = currentItem?.isChecked ?? false ? .checkmark : .none
+        if let current = selectedList {
+            cell.backgroundColor = UIColor(hexString: current.bgColor)?.darken(byPercentage: (CGFloat(indexPath.row) / CGFloat(items!.count)))
+            cell.textLabel?.textColor = ContrastColorOf(cell.backgroundColor!, returnFlat: true)
+            cell.tintColor = cell.textLabel?.textColor
+        }
         return cell
     }
     
@@ -86,8 +112,18 @@ class ItemsViewController: UITableViewController {
         present(alert, animated: true)
     }
     
+    override func updateModel(at indexPath: IndexPath) {
+        do {
+            try self.realm.write({
+                self.realm.delete(self.items![indexPath.row])
+            })
+        } catch {
+            print(error)
+        }
+    }
+    
     func loadItems() {
-        items = selectedList?.items.sorted(byKeyPath: "title", ascending: true)
+        items = selectedList?.items.sorted(byKeyPath: "dateCreated", ascending: true)
         tableView.reloadData()
     }
 }
@@ -96,7 +132,7 @@ class ItemsViewController: UITableViewController {
 
 extension ItemsViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        items = items?.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "dateCreated", ascending: true)
+        items = items?.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "title", ascending: true)
         tableView.reloadData()
     }
     
